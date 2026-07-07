@@ -1,0 +1,88 @@
+# 성남시 청년 해커톤 RAG
+
+2026 성남시 정책 아이디어 청년 해커톤 공고 PDF를 청킹하고, Supabase `documents_test`에 적재한 뒤 Cohere 기반 RAG 질의응답을 수행하는 예제입니다.
+
+## 구성
+
+- `app/chunk_pdf.py`: PDF 텍스트 추출 및 청킹
+- `app/cohere_supabase_uploader.py`: Cohere `embed-v4.0` 1536차원 임베딩 생성 후 Supabase 적재
+- `app/server.py`: 로컬 RAG API 및 HTML 서버
+- `app/index.html`: 질의응답 화면
+- `data/hackathon_chunks.json`: 청킹 결과 11개
+- `결과화면/`: 실행 결과 스크린샷
+
+## API 키 관리
+
+API 키와 Supabase service role key는 커밋하지 않습니다.
+
+실행할 때 `app/.env.example`을 참고해 `app/.env`를 만들거나, PowerShell 환경변수로 설정하세요. `.env`는 `.gitignore`에 포함되어 있습니다.
+
+필요한 값:
+
+```powershell
+$env:COHERE_API_KEY="..."
+$env:SUPABASE_URL="https://..."
+$env:SUPABASE_SERVICE_ROLE_KEY="..."
+```
+
+## 설치
+
+```powershell
+cd app
+pip install -r requirements.txt
+```
+
+## 청킹
+
+```powershell
+python .\chunk_pdf.py --input "C:\path\to\2026 성남시 정책 아이디어 청년 해커톤 대회 개최 공고.pdf" --output ..\data\hackathon_chunks.json
+```
+
+현재 저장소에는 이미 생성된 `data/hackathon_chunks.json`이 포함되어 있습니다.
+
+## Supabase 적재
+
+`documents_test` 테이블은 아래 컬럼을 사용합니다.
+
+- `id`
+- `content`
+- `metadata`
+- `embedding vector(1536)`
+
+적재:
+
+```powershell
+python .\cohere_supabase_uploader.py --table documents_test --input ..\data\hackathon_chunks.json
+```
+
+이번 문서의 청크는 `metadata.document_key = seongnam_youth_hackathon_2026`로 필터링됩니다.
+
+## 실행
+
+```powershell
+python .\server.py
+```
+
+브라우저에서 엽니다.
+
+```text
+http://127.0.0.1:8767
+```
+
+## RAG 흐름
+
+```text
+질문
+-> Cohere embed-v4.0, search_query, 1536차원
+-> Supabase documents_test에서 document_key 기준 검색
+-> Cohere rerank-v3.5
+-> Cohere command-r-08-2024 답변 생성
+```
+
+## 결과화면
+
+![질문 답변 화면](결과화면/01_질문_답변화면.png)
+
+![리랭킹 근거 상단](결과화면/02_리랭킹_근거상단.png)
+
+![리랭킹 근거 하단](결과화면/03_리랭킹_근거하단.png)

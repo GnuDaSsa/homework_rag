@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>성남시 청년 해커톤 RAG</title>
+  <style>
+    :root {
+      --bg: #f5f7fa;
+      --panel: #fff;
+      --ink: #17202c;
+      --muted: #657386;
+      --line: #d7dee8;
+      --blue: #155fa0;
+      --green: #167456;
+      --amber: #8a5a00;
+      --red: #b42318;
+      --blue-soft: #e8f1fb;
+      --green-soft: #e6f4ee;
+      --amber-soft: #fff2d2;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Malgun Gothic", Arial, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 16px 24px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: center;
+    }
+    h1 {
+      margin: 0;
+      font-size: 20px;
+      letter-spacing: 0;
+    }
+    .meta {
+      color: var(--muted);
+      text-align: right;
+      font-size: 12px;
+    }
+    main {
+      width: min(1180px, 100%);
+      margin: 0 auto;
+      padding: 18px 24px 32px;
+    }
+    form {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 110px;
+      gap: 10px;
+      align-items: stretch;
+    }
+    textarea, input {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font: inherit;
+    }
+    textarea {
+      min-height: 80px;
+      padding: 10px 12px;
+      resize: vertical;
+    }
+    label {
+      display: grid;
+      gap: 5px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    input {
+      height: 40px;
+      padding: 7px 9px;
+      font-size: 14px;
+    }
+    button {
+      border: 0;
+      border-radius: 6px;
+      background: var(--blue);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      min-height: 40px;
+      align-self: end;
+    }
+    button:disabled { opacity: .62; cursor: wait; }
+    .status {
+      min-height: 24px;
+      margin: 12px 0;
+      color: var(--muted);
+    }
+    .status.error {
+      color: var(--red);
+      font-weight: 700;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-head {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfe;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+    .panel-head h2 {
+      margin: 0;
+      font-size: 16px;
+      letter-spacing: 0;
+    }
+    .badge {
+      background: var(--blue-soft);
+      color: var(--blue);
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+    th, td {
+      border-right: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      padding: 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      background: #f8fafc;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    td {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+    .answer {
+      padding: 14px;
+      min-height: 230px;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+    details {
+      border-top: 1px solid var(--line);
+      padding: 10px 14px 14px;
+      background: #fbfcfe;
+    }
+    summary {
+      cursor: pointer;
+      color: var(--blue);
+      font-weight: 700;
+    }
+    .chunk {
+      margin-top: 10px;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+    }
+    .chunk-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .chip {
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: var(--green-soft);
+      color: var(--green);
+    }
+    .chip.rank {
+      background: var(--amber-soft);
+      color: var(--amber);
+    }
+    .chunk-text {
+      max-height: 150px;
+      overflow: auto;
+      white-space: pre-wrap;
+      word-break: keep-all;
+    }
+    @media (max-width: 860px) {
+      header { flex-direction: column; align-items: flex-start; }
+      .meta { text-align: left; }
+      form { grid-template-columns: 1fr 1fr; }
+      textarea { grid-column: 1 / -1; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>성남시 청년 해커톤 RAG</h1>
+    <div class="meta" id="modelLine">Cohere embed-v4.0 · rerank-v3.5 · command-r</div>
+  </header>
+  <main>
+    <form id="askForm">
+      <textarea id="question" placeholder="질문을 입력하세요">참가 자격과 신청 기간을 알려줘</textarea>
+      <label>후보 청크
+        <input id="topK" type="number" min="1" max="30" value="11">
+      </label>
+      <label>답변 청크
+        <input id="topN" type="number" min="1" max="10" value="6">
+      </label>
+      <button id="askButton" type="submit">질문</button>
+    </form>
+    <div id="status" class="status">문서 청크 적재 후 질문할 수 있습니다.</div>
+    <section class="panel" id="resultPanel">
+      <div class="panel-head">
+        <h2>답변</h2>
+        <span class="badge">대기</span>
+      </div>
+      <div class="answer">질문을 실행하면 답변이 표시됩니다.</div>
+    </section>
+  </main>
+  <script>
+    const form = document.getElementById("askForm");
+    const statusEl = document.getElementById("status");
+    const button = document.getElementById("askButton");
+    const panel = document.getElementById("resultPanel");
+    const modelLine = document.getElementById("modelLine");
+
+    const fmt = value => Number.isFinite(value) ? value.toLocaleString("ko-KR") : "-";
+    const escapeHtml = value => String(value ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+
+    function tokenText(tokens) {
+      if (!tokens) return "-";
+      const total = tokens.total_tokens ?? tokens.totalTokens;
+      const prompt = tokens.prompt_tokens ?? tokens.input_tokens;
+      const completion = tokens.completion_tokens ?? tokens.output_tokens;
+      if (total !== undefined) return `${fmt(total)} (${fmt(prompt)} / ${fmt(completion)})`;
+      if (prompt !== undefined || completion !== undefined) return `${fmt(prompt)} / ${fmt(completion)}`;
+      return "-";
+    }
+
+    function sourceLabel(chunk) {
+      const metadata = chunk.metadata || {};
+      return metadata.source_path || metadata.section_title || `id=${chunk.id}`;
+    }
+
+    function render(data) {
+      const m = data.metrics;
+      modelLine.textContent = `${data.models.embedding} · ${data.models.rerank} · ${data.models.generation}`;
+      panel.innerHTML = `
+        <div class="panel-head">
+          <h2>답변</h2>
+          <span class="badge">${fmt(m.total_ms)} ms</span>
+        </div>
+        <table>
+          <tbody>
+            <tr>
+              <th>청크 수</th><td>${fmt(m.table_chunks)}</td>
+              <th>후보/답변 청크</th><td>${fmt(m.candidate_chunks)} / ${fmt(m.answer_chunks)}</td>
+            </tr>
+            <tr>
+              <th>임베딩 ms</th><td>${fmt(m.embedding_ms)}</td>
+              <th>검색 ms</th><td>${fmt(m.search_ms)}</td>
+            </tr>
+            <tr>
+              <th>리랭킹 ms</th><td>${fmt(m.rerank_ms)}</td>
+              <th>생성 ms</th><td>${fmt(m.generation_ms)}</td>
+            </tr>
+            <tr>
+              <th>합계 ms</th><td>${fmt(m.total_ms)}</td>
+              <th>생성 토큰</th><td>${tokenText(m.generation_tokens)}</td>
+            </tr>
+            <tr>
+              <th>임베딩 토큰</th><td>${tokenText(m.embedding_tokens)}</td>
+              <th>문서 키</th><td>${escapeHtml(m.document_key)}</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="answer">${escapeHtml(data.answer)}</div>
+        <details open>
+          <summary>Cohere 리랭킹 근거 청크 ${data.chunks.length}개</summary>
+          ${data.chunks.map((chunk, index) => `
+            <div class="chunk">
+              <div class="chunk-meta">
+                <span class="chip">#${index + 1}</span>
+                <span class="chip">id ${chunk.id}</span>
+                <span class="chip">sim ${chunk.similarity}</span>
+                <span class="chip rank">rerank ${chunk.rerank_score}</span>
+                <span>${escapeHtml(sourceLabel(chunk))}</span>
+              </div>
+              <div class="chunk-text">${escapeHtml(chunk.content)}</div>
+            </div>
+          `).join("")}
+        </details>
+      `;
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const question = document.getElementById("question").value.trim();
+      if (!question) return;
+      button.disabled = true;
+      statusEl.className = "status";
+      statusEl.textContent = "처리 중...";
+      try {
+        const response = await fetch("/api/ask", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({
+            question,
+            top_k: Number(document.getElementById("topK").value),
+            top_n: Number(document.getElementById("topN").value)
+          })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || "요청 실패");
+        render(data);
+        statusEl.textContent = "완료";
+      } catch (error) {
+        statusEl.className = "status error";
+        statusEl.textContent = error.message;
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    fetch("/api/count")
+      .then(r => r.json())
+      .then(data => {
+        if (data.chunks !== undefined) statusEl.textContent = `현재 적재 청크: ${fmt(data.chunks)}개`;
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>
