@@ -2,6 +2,12 @@
 
 2026 성남시 정책 아이디어 청년 해커톤 공고 PDF를 청킹하고, Supabase `documents_test`에 적재한 뒤 Cohere 기반 RAG 질의응답을 수행하는 예제입니다.
 
+## 구현 배경
+
+초기 구현에서는 OpenAI `text-embedding-3-small` 임베딩을 사용할 계획이었으나, 제공된 OpenAI API 키가 임베딩 요청에서 인증 오류로 동작하지 않았습니다. 따라서 동일한 `vector(1536)` Supabase 스키마를 유지할 수 있도록 Cohere `embed-v4.0`의 1536차원 임베딩을 사용했습니다.
+
+현재 구현은 Cohere trial API 키만으로 임베딩, 리랭킹, 답변 생성을 모두 수행합니다.
+
 ## 구성
 
 - `app/chunk_pdf.py`: PDF 텍스트 추출 및 청킹
