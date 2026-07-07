@@ -15,14 +15,13 @@
 
 API 키와 Supabase service role key는 커밋하지 않습니다.
 
-실행할 때 `app/.env.example`을 참고해 `app/.env`를 만들거나, PowerShell 환경변수로 설정하세요. `.env`는 `.gitignore`에 포함되어 있습니다.
+실행할 때 루트의 `.env.example`을 복사해 `.env`를 만들거나, PowerShell 환경변수로 설정하세요. `.env`는 `.gitignore`에 포함되어 있습니다.
 
 필요한 값:
 
 ```powershell
-$env:COHERE_API_KEY="..."
-$env:SUPABASE_URL="https://..."
-$env:SUPABASE_SERVICE_ROLE_KEY="..."
+Copy-Item .env.example .env
+# .env 파일을 열어 SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY / COHERE_API_KEY 값을 채우세요.
 ```
 
 ## 설치

@@ -16,6 +16,19 @@ DEFAULT_EMBED_MODEL = "embed-v4.0"
 DEFAULT_OUTPUT_DIMENSION = 1536
 
 
+def load_dotenv() -> None:
+    app_dir = Path(__file__).resolve().parent
+    for env_path in (app_dir.parent / ".env", app_dir / ".env"):
+        if not env_path.exists():
+            continue
+        for line in env_path.read_text(encoding="utf-8-sig").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+
+
 def get_config_value(env_name: str, label: str, secret: bool = False) -> str:
     value = os.getenv(env_name, "").strip()
     if value:
@@ -93,6 +106,7 @@ def upsert_rows(supabase, table: str, rows: list[dict[str, Any]], max_retries: i
 
 
 def main() -> None:
+    load_dotenv()
     parser = argparse.ArgumentParser(description="Cohere embed-v4.0으로 청크를 임베딩해 Supabase에 업로드합니다.")
     parser.add_argument("--input", default=DEFAULT_INPUT)
     parser.add_argument("--table", default=DEFAULT_TABLE)

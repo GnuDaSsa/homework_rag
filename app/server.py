@@ -11,6 +11,7 @@ import requests
 
 
 APP_DIR = Path(__file__).resolve().parent
+ROOT_DIR = APP_DIR.parent
 INDEX_PATH = APP_DIR / "index.html"
 
 COHERE_EMBED_MODEL = os.getenv("COHERE_EMBED_MODEL", "embed-v4.0")
@@ -23,15 +24,15 @@ DEFAULT_RERANK_TOP_N = int(os.getenv("RERANK_TOP_N", "6"))
 
 
 def load_dotenv() -> None:
-    env_path = APP_DIR / ".env"
-    if not env_path.exists():
-        return
-    for line in env_path.read_text(encoding="utf-8-sig").splitlines():
-        line = line.strip()
-        if not line or line.startswith("#") or "=" not in line:
+    for env_path in (ROOT_DIR / ".env", APP_DIR / ".env"):
+        if not env_path.exists():
             continue
-        key, value = line.split("=", 1)
-        os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
+        for line in env_path.read_text(encoding="utf-8-sig").splitlines():
+            line = line.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, value = line.split("=", 1)
+            os.environ.setdefault(key.strip(), value.strip().strip('"').strip("'"))
 
 
 def required_env(name: str) -> str:
