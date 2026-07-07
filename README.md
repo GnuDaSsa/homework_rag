@@ -18,7 +18,7 @@
 - `data/hackathon_source.md`: PDF에서 추출한 청킹 전 Markdown 원문
 - `결과화면/`: 실행 결과 스크린샷
 
-PDF를 Markdown으로 변환한 기준과 11개 청크가 만들어진 과정은 [docs/chunking.md](docs/chunking.md)에 정리했습니다.
+PDF를 Markdown으로 변환한 기준, 사용한 청킹 기법, 해당 기법을 선택한 이유, 11개 청크가 만들어진 과정은 [docs/chunking.md](docs/chunking.md)에 정리했습니다.
 
 ## API 키 관리
 
