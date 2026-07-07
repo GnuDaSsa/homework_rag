@@ -15,7 +15,10 @@
 - `app/server.py`: 로컬 RAG API 및 HTML 서버
 - `app/index.html`: 질의응답 화면
 - `data/hackathon_chunks.json`: 청킹 결과 11개
+- `data/hackathon_source.md`: PDF에서 추출한 청킹 전 Markdown 원문
 - `결과화면/`: 실행 결과 스크린샷
+
+PDF를 Markdown으로 변환한 기준과 11개 청크가 만들어진 과정은 [docs/chunking.md](docs/chunking.md)에 정리했습니다.
 
 ## API 키 관리
 
