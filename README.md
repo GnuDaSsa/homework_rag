@@ -62,6 +62,8 @@ python .\cohere_supabase_uploader.py --table documents_test --input ..\data\hack
 
 이번 문서의 청크는 `metadata.document_key = seongnam_youth_hackathon_2026`로 필터링됩니다.
 
+현재 Supabase `documents_test`는 기존 테스트 데이터를 삭제한 뒤, 이 저장소의 `data/hackathon_chunks.json`에서 생성한 해커톤 공고 청크 11개만 적재한 상태를 기준으로 동작합니다. 앱의 `DOCUMENT_KEY` 기본값도 `seongnam_youth_hackathon_2026`로 맞춰져 있어, 화면의 답변과 근거 청크는 이 테이블에 적재된 데이터와 직접 연계됩니다.
+
 ## 실행
 
 ```powershell
